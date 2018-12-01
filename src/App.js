@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import './App.css';
-import * as Timer from './timer';
-import { test } from './timer';
+import * as timer from './Timer';
 
-console.log(Timer, test);
+
 class App extends Component {
   
   state = {
 		sessionLength: 25,
 		breakLength: 5,
-    running: false
+    running: false,
+    secondsElapsed: 0,
+    timer: 1500
 	}
 	
   incrementSessionLength(){
@@ -50,24 +51,60 @@ class App extends Component {
 
   start(){
 
-  }
-  stop(){
+    console.log('start')
+    setInterval(() => {
+        this.setState({
+            timer: this.state.timer - 1,
+            running: true
+        })
+    }, 1000)
+}
+  
+componentDidMount() {
+    
+}
+componentWillUnmount() {
+    clearInterval(this.interval)
+}
+
+  switchTimer() {
 
   }
-  start_stop(){
+  stop(){
     
+  }
+  start_stop(){
+    if (this.state.running) {
+      this.setState({
+        running: false,
+        timer: this.state.timer
+      })
+      clearInterval(this.interval)
+    }
+    else if(!this.state.running) {
+      this.interval = setInterval(() => {
+        this.setState({
+            timer: this.state.timer - 1,
+            running: true
+        })
+    }, 1000)
+}
+    console.log('starting')
   }
   reset(){
     const {breakLength, sessionLength } = this.state
     this.setState({
       breakLength: 5,
-      sessionLength: 25
+      sessionLength: 25,
+      timer: 1500,
+      running: false
+
     })
   }
 
 
   render() {
-    const { sessionLength, breakLength } = this.state
+    const { sessionLength, timer, breakLength } = this.state
     return (
 
       <div className="App">
@@ -75,6 +112,7 @@ class App extends Component {
 
           <h1 id='title'>Pomodoro Clock</h1>
           <div id="topWrapper">
+          <pre>{JSON.stringify(this.state)}</pre>
             <div id="labels">
               <h3 id='break-label'>BREAK LENGTH</h3>
               <h3 id='session-label'>SESSION LENGTH</h3>
@@ -88,15 +126,16 @@ class App extends Component {
               <div id="break-length">{breakLength}</div>
             </div>
           </div>
-          <div className="timerWrapper" id='start_stop'>
+          <div className="timerWrapper" id='start_stop' onClick={() => this.start_stop()}>
             <div id="timer">
               <div id="timer-label">SESSION</div>
-              <div id="time-left">25:00</div>
-              <div id="timer-control">
-                <button id='reset' onClick={() => this.reset()}>reset</button>
+              <div id="time-left">{timer}</div>
+              
+              </div>  
               </div>
-            </div>
-          </div>
+            <div id="timer-control"></div>
+          <button id='reset' onClick={() => this.reset()}>reset</button>
+          
         </div>
       </div>
     );

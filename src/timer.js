@@ -1,36 +1,34 @@
 import React, { Component } from 'react';
 import './App.css';
 
-export const test ='test'
-export class Timer extends Component {
-	state = {
-		sessionLength: '25',
-		breakLength: '5',
-
-	}
-	
-  incrementSessionLength(){
-		const { sessionlength } = this.state
-		this.setState({
-			sessionLength: 'test'
-		})
-		}
-	decrementSessionLength(){
-		const { sessionlength } = this.state
-		this.setState({
-			sessionLength: 'test'
-		})
-		}
-	incrementBreakLength(){
-		const { sessionlength } = this.state
-		this.setState({
-			sessionLength: 'test'
-		})
-		}
-	decrementBreakLength(){
-		const { sessionlength } = this.state
-		this.setState({
-			sessionLength: 'test'
-		})
-		}
-	}
+class Timer extends Component {
+    constructor(props){
+    super(props)
+    this.state ={
+        count: 1
+    }
+}
+}
+/*render() {
+    const { count } = this.state
+    return(
+        <div>
+            <hi>{count}</hi>
+        </div>
+    )
+}
+start(){
+    console.log('start')
+    this.interval = setInterval(() => {
+        this.setState(prevState => ({
+            count: prevState.count - 1
+        }))
+    }, 1000)
+}
+componentDidMount() {
+}
+componentWillUnmount() {
+    clearInterval(this.interval)
+}
+}
+export default Timer*/
