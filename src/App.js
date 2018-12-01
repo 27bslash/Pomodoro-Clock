@@ -4,102 +4,126 @@ import * as timer from './Timer';
 
 
 class App extends Component {
-  
+
   state = {
-		sessionLength: 25,
-		breakLength: 5,
+    sessionLength: 25,
+    breakLength: 5,
     running: false,
-    secondsElapsed: 0,
-    timer: 1500
-	}
-	
-  incrementSessionLength(){
-    const { sessionLength } = this.state
-    if (sessionLength < 30) {
-		this.setState({
-			sessionLength: sessionLength + 1
-		})
+    timer: 1500,
+    timerType: 'session'
+  }
+
+  incrementSessionLength() {
+    const { sessionLength, timer } = this.state
+    if (this.state.timerType === 'session') {
+      if (!this.state.running) {
+        if (sessionLength < 30) {
+          this.setState({
+            sessionLength: sessionLength + 1,
+            timer: (sessionLength * 60) + 60
+          })
+        }
+      }
     }
   }
 
-	decrementSessionLength(){
-    const { sessionLength } = this.state
-    if (sessionLength > 1) {
-		this.setState({
-			sessionLength: sessionLength - 1
-		})
+  decrementSessionLength() {
+    const { sessionLength, timer } = this.state
+    if (this.state.timerType === 'session') {
+      if (!this.state.running) {
+        if (sessionLength > 1) {
+          this.setState({
+            sessionLength: sessionLength - 1,
+            timer: sessionLength * 60 - 60
+          })
+        }
+      }
     }
   }
 
-	incrementBreakLength(){
-    let { breakLength } = this.state
-    if (breakLength < 5) {
-		this.setState({
-			breakLength: breakLength + 1
-		})
+  incrementBreakLength() {
+    const { breakLength, timer } = this.state
+    if (this.state.timerType === 'break') {
+      if (!this.state.running) {
+        if (breakLength < 5) {
+          this.setState({
+            breakLength: breakLength + 1,
+            timer: breakLength * 60 + 60
+          })
+        }
+      }
     }
   }
 
-  decrementBreakLength(){
-    const { breakLength } = this.state
-    if (breakLength > 1) {
-		this.setState({
-			breakLength: breakLength - 1
-		})
-		}
+  decrementBreakLength() {
+    const { breakLength, timer } = this.state
+    if (this.state.timerType === 'break') {
+      if (!this.state.running) {
+        if (breakLength > 1) {
+          this.setState({
+            breakLength: breakLength - 1,
+            timer: breakLength * 60 - 60
+          })
+        }
+      }
+    }
   }
 
-  start(){
-
-    console.log('start')
-    setInterval(() => {
-        this.setState({
-            timer: this.state.timer - 1,
-            running: true
-        })
-    }, 1000)
-}
-  
-componentDidMount() {
-    
-}
-componentWillUnmount() {
-    clearInterval(this.interval)
-}
+  minutes() {
+    const { timer } = this.state
+    let minutes = Math.floor(timer / 60)
+    let seconds = timer - minutes * 60
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    return minutes + ':' + seconds;
+  }
 
   switchTimer() {
+    const { timer, timerType } = this.state
+      this.setState({
+        timerType: timerType === 'session' ?  'break':'session'
+      })
+    }
+  
 
-  }
-  stop(){
-    
-  }
-  start_stop(){
-    if (this.state.running) {
+
+  start_stop() {
+    if (this.state.timer === 0) {
+      console.log('zerio')
+      this.setState({
+        running: false,
+        timer: this.state.timer
+      })
+
+    } else if (!this.state.running) {
+
+      this.interval = setInterval(() => {
+        this.setState({
+          timer: this.state.timer - 1,
+          running: true
+        })
+      }, 10)
+    }
+    else {
       this.setState({
         running: false,
         timer: this.state.timer
       })
       clearInterval(this.interval)
+
+      console.log('starting')
     }
-    else if(!this.state.running) {
-      this.interval = setInterval(() => {
-        this.setState({
-            timer: this.state.timer - 1,
-            running: true
-        })
-    }, 1000)
-}
-    console.log('starting')
   }
-  reset(){
-    const {breakLength, sessionLength } = this.state
+  reset() {
+    const { breakLength, sessionLength } = this.state
+    clearInterval(this.interval)
     this.setState({
       breakLength: 5,
       sessionLength: 25,
       timer: 1500,
       running: false
-
     })
+
   }
 
 
@@ -112,7 +136,7 @@ componentWillUnmount() {
 
           <h1 id='title'>Pomodoro Clock</h1>
           <div id="topWrapper">
-          <pre>{JSON.stringify(this.state)}</pre>
+            <pre>{JSON.stringify(this.state)}</pre>
             <div id="labels">
               <h3 id='break-label'>BREAK LENGTH</h3>
               <h3 id='session-label'>SESSION LENGTH</h3>
@@ -122,6 +146,7 @@ componentWillUnmount() {
               <button id='session-increment' onClick={() => this.incrementSessionLength()}>i</button>
               <button id='break-decrement' onClick={() => this.decrementBreakLength()}>d</button>
               <button id='session-decrement' onClick={() => this.decrementSessionLength()}>d</button>
+              <button id='switch' onClick={() => this.switchTimer()}>sw</button>
               <div id="session-length">{sessionLength}</div>
               <div id="break-length">{breakLength}</div>
             </div>
@@ -129,13 +154,13 @@ componentWillUnmount() {
           <div className="timerWrapper" id='start_stop' onClick={() => this.start_stop()}>
             <div id="timer">
               <div id="timer-label">SESSION</div>
-              <div id="time-left">{timer}</div>
-              
-              </div>  
-              </div>
-            <div id="timer-control"></div>
+              <div id="time-left">{this.minutes()}</div>
+
+            </div>
+          </div>
+          <div id="timer-control"></div>
           <button id='reset' onClick={() => this.reset()}>reset</button>
-          
+
         </div>
       </div>
     );
