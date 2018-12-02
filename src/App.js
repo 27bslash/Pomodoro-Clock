@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import './App.css';
 
 
-
 class App extends Component {
 
   state = {
@@ -10,7 +9,9 @@ class App extends Component {
     breakLength: 5,
     running: false,
     timer: 60,
-    timerType: 'session'
+    timerType: 'session',
+    count: 0,
+    lBreakLength: 15,
   }
 
   incrementSessionLength() {
@@ -55,6 +56,7 @@ class App extends Component {
     }
   }
 
+
   decrementBreakLength() {
     const { breakLength } = this.state
     if (!this.state.running) {
@@ -68,6 +70,33 @@ class App extends Component {
     }
   }
 
+  incrementLBreakLength() {
+    const { lBreakLength } = this.state
+
+    if (!this.state.running) {
+      if (lBreakLength < 60) {
+        this.setState({
+          timerType: 'lBreak',
+          lBreakLength: lBreakLength + 1,
+          timer: lBreakLength * 60 + 60
+        })
+      }
+    }
+  }
+
+  decrementLBreakLength() {
+    const { lBreakLength } = this.state
+    if (!this.state.running) {
+      if (lBreakLength > 1) {
+        this.setState({
+          timerType: 'lBreak',
+          lBreakLength: lBreakLength - 1,
+          timer: lBreakLength * 60 - 60
+        })
+      }
+    }
+  }
+
   minutes() {
     const { timer } = this.state
 
@@ -75,10 +104,6 @@ class App extends Component {
     let seconds = timer - minutes * 60
     seconds = seconds < 10 ? '0' + seconds : seconds;
     minutes = minutes < 10 ? '0' + minutes : minutes;
-    if (seconds === 0 && minutes === 0) {
-      console.log('minutes')
-      this.switchTimer()
-    }
     return minutes + ':' + seconds;
   }
   switch(num, str) {
@@ -89,26 +114,38 @@ class App extends Component {
     this.start_stop()
   }
   switchTimer() {
-    const { timerType, timer, breakLength, sessionLength } = this.state
+    const { timerType, timer, breakLength, lBreakLength, sessionLength } = this.state
     // eslint-disable-next-line default-case
     this.alarm()
     if (timer === 0) {
-      timerType === 'session' ? 
+      timerType === 'session' ?
         this.switch(breakLength * 60, 'break')
-       : 
+        :
         this.switch(sessionLength * 60, 'session')
+
+    }
+    clearInterval(this.interval)
+    this.start_stop()
+    if (this.state.count > 4) {
+      timerType === 'session' ?
+        this.switch(lBreakLength * 60, 'lBreak')
+        :
+        this.switch(sessionLength * 60, 'session')
+      this.setState({
+        count: 0
+      })
+      clearInterval(this.interval)
+      this.start_stop()
     }
   }
   start_stop() {
-    
+    clearInterval(this.interval)
     if (this.state.running) {
-      clearInterval(this.interval)
+
       this.setState({
         running: false,
         timer: this.state.timer
       })
-      this.switchTimer()
-      console.log(this.state.timerType)
 
     } else if (!this.state.running) {
       this.interval = setInterval(
@@ -123,22 +160,23 @@ class App extends Component {
             clearInterval(this.interval)
             this.setState({
               running: false,
-              timer: this.state.timer
+              timer: this.state.timer,
+              count: this.state.count + 1
             })
             this.switchTimer()
-            console.log(this.state.timerType)
           }
         },
-        100
-      )  
+        1000
+      )
     }
 
   }
-          
+
   alarm() {
     if (this.state.timer === 0) {
       this.audioBeep.play();
-  }}
+    }
+  }
 
   reset() {
     clearInterval(this.interval)
@@ -147,7 +185,8 @@ class App extends Component {
       sessionLength: 25,
       timer: 1500,
       timerType: 'session',
-      running: false
+      running: false,
+      count: 0
     })
     this.audioBeep.currentTime = 0
     this.audioBeep.pause()
@@ -156,7 +195,7 @@ class App extends Component {
 
 
   render() {
-    const { sessionLength, timerType, breakLength } = this.state
+    const { sessionLength, timerType, breakLength, lBreakLength } = this.state
     return (
 
       <div className="App">
@@ -164,19 +203,22 @@ class App extends Component {
 
           <h1 id='title'>Pomodoro Clock</h1>
           <div id="topWrapper">
-            <pre>{JSON.stringify(this.state)}</pre>
             <div id="labels">
-              <h3 id='break-label'>BREAK LENGTH</h3>
-              <h3 id='session-label'>SESSION LENGTH</h3>
+              <h3 id='break-label'>BREAK<br></br>LENGTH</h3>
+              <h3 id='session-label'>SESSION<br></br>LENGTH</h3>
+              <h3 id='l-break-label'>LONG<br></br>BREAK</h3>
+              
             </div>
             <div id="controls">
-              <button id='break-increment' onClick={() => this.incrementBreakLength()}>i</button>
-              <button id='session-increment' onClick={() => this.incrementSessionLength()}>i</button>
-              <button id='break-decrement' onClick={() => this.decrementBreakLength()}>d</button>
-              <button id='session-decrement' onClick={() => this.decrementSessionLength()}>d</button>
-              <button id='switch' onClick={() => this.stop()}>sw</button>
+              <button className='button' id='break-increment' onClick={() => this.incrementBreakLength()}>i</button>
+              <button className='button' id='session-increment' onClick={() => this.incrementSessionLength()}>i</button>
+              <button className='button' id='lbreak-increment' onClick={() => this.incrementLBreakLength()}>i</button>
+              <button className='button' id='break-decrement' onClick={() => this.decrementBreakLength()}>d</button>
+              <button className='button' id='lbreak-decrement' onClick={() => this.decrementLBreakLength()}>d</button>
+              <button className='button' id='session-decrement' onClick={() => this.decrementSessionLength()}>d</button>
               <div id="session-length">{sessionLength}</div>
               <div id="break-length">{breakLength}</div>
+              <div id="lBreakLength">{lBreakLength}</div>
             </div>
           </div>
           <div className="timerWrapper" id='start_stop' onClick={() => this.start_stop()}>
@@ -187,10 +229,10 @@ class App extends Component {
             </div>
           </div>
           <div id="timer-control"></div>
-          <button id='reset' onClick={() => this.reset()}>reset</button>
+          <button id='reset' onClick={() => this.reset()}>RESET</button>
 
         </div>
-        <audio id ='beep' src='https://goo.gl/65cBl1' ref={(audio) =>{ this.audioBeep = audio;}} />
+        <audio id='beep' src='https://goo.gl/65cBl1' ref={(audio) => { this.audioBeep = audio; }} />
       </div>
     );
   }
