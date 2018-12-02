@@ -91,6 +91,7 @@ class App extends Component {
   switchTimer() {
     const { timerType, timer, breakLength, sessionLength } = this.state
     // eslint-disable-next-line default-case
+    this.alarm()
     if (timer === 0) {
       timerType === 'session' ? 
         this.switch(breakLength * 60, 'break')
@@ -134,14 +135,10 @@ class App extends Component {
 
   }
           
-  stop() {
-    if(this.state.running){
-      this.setState({
-        running: false,
-      })
-    }
-  }
-
+  alarm() {
+    if (this.state.timer === 0) {
+      this.audioBeep.play();
+  }}
 
   reset() {
     clearInterval(this.interval)
@@ -152,6 +149,8 @@ class App extends Component {
       timerType: 'session',
       running: false
     })
+    this.audioBeep.currentTime = 0
+    this.audioBeep.pause()
 
   }
 
@@ -191,6 +190,7 @@ class App extends Component {
           <button id='reset' onClick={() => this.reset()}>reset</button>
 
         </div>
+        <audio id ='beep' src='https://goo.gl/65cBl1' ref={(audio) =>{ this.audioBeep = audio;}} />
       </div>
     );
   }
