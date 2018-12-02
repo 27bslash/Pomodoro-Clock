@@ -75,54 +75,72 @@ class App extends Component {
     let seconds = timer - minutes * 60
     seconds = seconds < 10 ? '0' + seconds : seconds;
     minutes = minutes < 10 ? '0' + minutes : minutes;
-    if (seconds > 0 && minutes) {
+    if (seconds === 0 && minutes === 0) {
+      console.log('minutes')
       this.switchTimer()
     }
     return minutes + ':' + seconds;
   }
-
-  switchTimer(_timer) {
+  switch(num, str) {
+    this.setState({
+      timer: num,
+      timerType: str,
+    })
+    this.start_stop()
+  }
+  switchTimer() {
     const { timerType, timer, breakLength, sessionLength } = this.state
     // eslint-disable-next-line default-case
-    this.setState({
-      timerType: timerType === 'session' ? 'break' : 'session',
-    })
-    if (timerType === 'session'){
-      this.setState({
-        timer: sessionLength * 60
-      })
-    }else if (timer === 'break') {
-      this.setState({
-        timer: breakLength * 60
-      })
+    if (timer === 0) {
+      timerType === 'session' ? 
+        this.switch(breakLength * 60, 'break')
+       : 
+        this.switch(sessionLength * 60, 'session')
     }
-    clearInterval(this.interval)
   }
-
   start_stop() {
-    if (!this.state.running) {
+    
+    if (this.state.running) {
+      clearInterval(this.interval)
+      this.setState({
+        running: false,
+        timer: this.state.timer
+      })
+      this.switchTimer()
+      console.log(this.state.timerType)
+
+    } else if (!this.state.running) {
       this.interval = setInterval(
         () => {
           if (this.state.timer > 0) {
 
             this.setState(prevState => ({
               timer: prevState.timer - 1,
-              running: true
+              running: true,
             }))
-          } else {
+          } else if (this.state.running) {
             clearInterval(this.interval)
             this.setState({
               running: false,
+              timer: this.state.timer
             })
             this.switchTimer()
             console.log(this.state.timerType)
           }
         },
-        10
-      )
-      }
+        100
+      )  
     }
+
+  }
           
+  stop() {
+    if(this.state.running){
+      this.setState({
+        running: false,
+      })
+    }
+  }
 
 
   reset() {
@@ -131,6 +149,7 @@ class App extends Component {
       breakLength: 5,
       sessionLength: 25,
       timer: 1500,
+      timerType: 'session',
       running: false
     })
 
@@ -138,7 +157,7 @@ class App extends Component {
 
 
   render() {
-    const { sessionLength, breakLength } = this.state
+    const { sessionLength, timerType, breakLength } = this.state
     return (
 
       <div className="App">
@@ -156,14 +175,14 @@ class App extends Component {
               <button id='session-increment' onClick={() => this.incrementSessionLength()}>i</button>
               <button id='break-decrement' onClick={() => this.decrementBreakLength()}>d</button>
               <button id='session-decrement' onClick={() => this.decrementSessionLength()}>d</button>
-              <button id='switch' onClick={() => this.switchTimer()}>sw</button>
+              <button id='switch' onClick={() => this.stop()}>sw</button>
               <div id="session-length">{sessionLength}</div>
               <div id="break-length">{breakLength}</div>
             </div>
           </div>
           <div className="timerWrapper" id='start_stop' onClick={() => this.start_stop()}>
             <div id="timer">
-              <div id="timer-label">SESSION</div>
+              <div id="timer-label">{timerType}</div>
               <div id="time-left">{this.minutes()}</div>
 
             </div>
