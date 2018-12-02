@@ -1,121 +1,131 @@
 import React, { Component } from 'react';
 import './App.css';
-import * as timer from './Timer';
+
 
 
 class App extends Component {
 
   state = {
-    sessionLength: 25,
+    sessionLength: 1,
     breakLength: 5,
     running: false,
-    timer: 1500,
+    timer: 60,
     timerType: 'session'
   }
 
   incrementSessionLength() {
-    const { sessionLength, timer } = this.state
-    if (this.state.timerType === 'session') {
-      if (!this.state.running) {
-        if (sessionLength < 30) {
-          this.setState({
-            sessionLength: sessionLength + 1,
-            timer: (sessionLength * 60) + 60
-          })
-        }
+    const { sessionLength } = this.state
+    if (!this.state.running) {
+      if (sessionLength < 60) {
+        this.setState({
+          timerType: 'session',
+          sessionLength: sessionLength + 1,
+          timer: (sessionLength * 60) + 60
+        })
       }
+
     }
   }
 
   decrementSessionLength() {
-    const { sessionLength, timer } = this.state
-    if (this.state.timerType === 'session') {
-      if (!this.state.running) {
-        if (sessionLength > 1) {
-          this.setState({
-            sessionLength: sessionLength - 1,
-            timer: sessionLength * 60 - 60
-          })
-        }
+    const { sessionLength } = this.state
+    if (!this.state.running) {
+      if (sessionLength > 1) {
+        this.setState({
+          timerType: 'session',
+          sessionLength: sessionLength - 1,
+          timer: sessionLength * 60 - 60
+        })
       }
     }
   }
 
+
   incrementBreakLength() {
-    const { breakLength, timer } = this.state
-    if (this.state.timerType === 'break') {
-      if (!this.state.running) {
-        if (breakLength < 5) {
-          this.setState({
-            breakLength: breakLength + 1,
-            timer: breakLength * 60 + 60
-          })
-        }
+    const { breakLength } = this.state
+
+    if (!this.state.running) {
+      if (breakLength < 60) {
+        this.setState({
+          timerType: 'break',
+          breakLength: breakLength + 1,
+          timer: breakLength * 60 + 60
+        })
       }
     }
   }
 
   decrementBreakLength() {
-    const { breakLength, timer } = this.state
-    if (this.state.timerType === 'break') {
-      if (!this.state.running) {
-        if (breakLength > 1) {
-          this.setState({
-            breakLength: breakLength - 1,
-            timer: breakLength * 60 - 60
-          })
-        }
+    const { breakLength } = this.state
+    if (!this.state.running) {
+      if (breakLength > 1) {
+        this.setState({
+          timerType: 'break',
+          breakLength: breakLength - 1,
+          timer: breakLength * 60 - 60
+        })
       }
     }
   }
 
   minutes() {
     const { timer } = this.state
+
     let minutes = Math.floor(timer / 60)
     let seconds = timer - minutes * 60
     seconds = seconds < 10 ? '0' + seconds : seconds;
     minutes = minutes < 10 ? '0' + minutes : minutes;
+    if (seconds > 0 && minutes) {
+      this.switchTimer()
+    }
     return minutes + ':' + seconds;
   }
 
-  switchTimer() {
-    const { timer, timerType } = this.state
+  switchTimer(_timer) {
+    const { timerType, timer, breakLength, sessionLength } = this.state
+    // eslint-disable-next-line default-case
+    this.setState({
+      timerType: timerType === 'session' ? 'break' : 'session',
+    })
+    if (timerType === 'session'){
       this.setState({
-        timerType: timerType === 'session' ?  'break':'session'
+        timer: sessionLength * 60
+      })
+    }else if (timer === 'break') {
+      this.setState({
+        timer: breakLength * 60
       })
     }
-  
-
+    clearInterval(this.interval)
+  }
 
   start_stop() {
-    if (this.state.timer === 0) {
-      console.log('zerio')
-      this.setState({
-        running: false,
-        timer: this.state.timer
-      })
+    if (!this.state.running) {
+      this.interval = setInterval(
+        () => {
+          if (this.state.timer > 0) {
 
-    } else if (!this.state.running) {
-
-      this.interval = setInterval(() => {
-        this.setState({
-          timer: this.state.timer - 1,
-          running: true
-        })
-      }, 10)
+            this.setState(prevState => ({
+              timer: prevState.timer - 1,
+              running: true
+            }))
+          } else {
+            clearInterval(this.interval)
+            this.setState({
+              running: false,
+            })
+            this.switchTimer()
+            console.log(this.state.timerType)
+          }
+        },
+        10
+      )
+      }
     }
-    else {
-      this.setState({
-        running: false,
-        timer: this.state.timer
-      })
-      clearInterval(this.interval)
+          
 
-      console.log('starting')
-    }
-  }
+
   reset() {
-    const { breakLength, sessionLength } = this.state
     clearInterval(this.interval)
     this.setState({
       breakLength: 5,
@@ -128,7 +138,7 @@ class App extends Component {
 
 
   render() {
-    const { sessionLength, timer, breakLength } = this.state
+    const { sessionLength, breakLength } = this.state
     return (
 
       <div className="App">
