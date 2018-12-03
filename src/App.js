@@ -210,12 +210,12 @@ class App extends Component {
               
             </div>
             <div id="controls">
-              <button className='button' id='break-increment' onClick={() => this.incrementBreakLength()}>i</button>
-              <button className='button' id='session-increment' onClick={() => this.incrementSessionLength()}>i</button>
-              <button className='button' id='lbreak-increment' onClick={() => this.incrementLBreakLength()}>i</button>
-              <button className='button' id='break-decrement' onClick={() => this.decrementBreakLength()}>d</button>
-              <button className='button' id='lbreak-decrement' onClick={() => this.decrementLBreakLength()}>d</button>
-              <button className='button' id='session-decrement' onClick={() => this.decrementSessionLength()}>d</button>
+              <button className='button' id='break-increment' onClick={() => this.incrementBreakLength()}>+</button>
+              <button className='button' id='session-increment' onClick={() => this.incrementSessionLength()}>+</button>
+              <button className='button' id='lbreak-increment' onClick={() => this.incrementLBreakLength()}>+</button>
+              <button className='button' id='break-decrement' onClick={() => this.decrementBreakLength()}>-</button>
+              <button className='button' id='lbreak-decrement' onClick={() => this.decrementLBreakLength()}>-</button>
+              <button className='button' id='session-decrement' onClick={() => this.decrementSessionLength()}>-</button>
               <div id="session-length">{sessionLength}</div>
               <div id="break-length">{breakLength}</div>
               <div id="lBreakLength">{lBreakLength}</div>
